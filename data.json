@@ -1,0 +1,51 @@
+{
+  "statistics": {
+    "totalSchools": 12,
+    "totalStudents": 8750,
+    "totalTeachers": 485,
+    "averageClassSize": 18,
+    "graduationRate": 94
+  },
+  "schools": [
+    {
+      "name": "Lincoln Elementary School",
+      "students": 450,
+      "teachers": 25,
+      "gradeLevels": "K-5",
+      "performanceRating": "A",
+      "specialPrograms": "STEM, Arts Integration"
+    },
+    {
+      "name": "Washington Middle School",
+      "students": 680,
+      "teachers": 42,
+      "gradeLevels": "6-8",
+      "performanceRating": "A-",
+      "specialPrograms": "Advanced Mathematics, Band"
+    },
+    {
+      "name": "Roosevelt High School",
+      "students": 1200,
+      "teachers": 78,
+      "gradeLevels": "9-12",
+      "performanceRating": "A",
+      "specialPrograms": "AP Courses, Dual Enrollment, Robotics"
+    },
+    {
+      "name": "Jefferson Elementary School",
+      "students": 380,
+      "teachers": 22,
+      "gradeLevels": "K-5",
+      "performanceRating": "B+",
+      "specialPrograms": "ESL Support, Reading Recovery"
+    },
+    {
+      "name": "Madison High School",
+      "students": 950,
+      "teachers": 65,
+      "gradeLevels": "9-12",
+      "performanceRating": "A-",
+      "specialPrograms": "Career Technical Education, Sports Medicine"
+    }
+  ]
+}
