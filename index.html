@@ -3,276 +3,504 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>School System Dashboard</title>
+    <title>K-12 Mathematics Assessment Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            margin: 0;
             padding: 20px;
+            background-color: #f5f7fa;
         }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
         .header {
             text-align: center;
-            color: white;
             margin-bottom: 30px;
+            color: #2c3e50;
         }
-
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        .filters {
+            display: flex;
+            justify-content: center;
             gap: 20px;
             margin-bottom: 30px;
+            flex-wrap: wrap;
         }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 25px;
-            border-radius: 15px;
+        .filter-group {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            min-width: 200px;
+        }
+        .filter-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #34495e;
+        }
+        select, button {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .summary-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .stat-box {
             text-align: center;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            backdrop-filter: blur(10px);
-            transition: transform 0.3s ease;
+            padding: 15px;
+            background: #ecf0f1;
+            border-radius: 6px;
         }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .stat-number {
-            font-size: 2.5rem;
+        .stat-value {
+            font-size: 20px;
             font-weight: bold;
-            color: #667eea;
-            margin-bottom: 10px;
+            color: #2c3e50;
         }
-
         .stat-label {
-            font-size: 1.1rem;
-            color: #666;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-size: 11px;
+            color: #7f8c8d;
+            margin-top: 5px;
         }
-
-        .schools-section {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            backdrop-filter: blur(10px);
-        }
-
-        .section-title {
-            font-size: 1.8rem;
-            color: #333;
-            margin-bottom: 25px;
-            text-align: center;
-        }
-
-        .schools-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .school-card {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .school-card:hover {
-            transform: scale(1.02);
-        }
-
-        .school-name {
-            font-size: 1.4rem;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-
-        .school-info {
+        .dashboard {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            font-size: 0.9rem;
+            gap: 30px;
+            margin-bottom: 30px;
         }
-
-        .info-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 5px 0;
-        }
-
-        .loading {
-            text-align: center;
-            color: white;
-            font-size: 1.2rem;
-            padding: 50px;
-        }
-
-        .error {
-            background: #ff6b6b;
-            color: white;
+        .chart-container {
+            background: white;
             padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-
+        .chart-title {
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        .performance-levels {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .pl-box {
+            text-align: center;
+            padding: 10px;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+        }
+        .pl-1 { background-color: #e74c3c; }
+        .pl-2 { background-color: #f39c12; }
+        .pl-3 { background-color: #27ae60; }
+        .pl-4 { background-color: #2980b9; }
+        .pl-value {
+            font-size: 18px;
+        }
+        .pl-label {
+            font-size: 10px;
+            margin-top: 5px;
+        }
+        .school-info {
+            background: #34495e;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .school-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .assessment-info {
+            font-size: 14px;
+            opacity: 0.9;
+        }
         @media (max-width: 768px) {
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .stats-grid {
+            .dashboard {
                 grid-template-columns: 1fr;
             }
-            
-            .schools-grid {
-                grid-template-columns: 1fr;
+            .filters {
+                flex-direction: column;
+                align-items: center;
+            }
+            .filter-group {
+                width: 100%;
+                max-width: 300px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>School System Dashboard</h1>
-            <p>Real-time overview of district performance</p>
-        </div>
+    <div class="header">
+        <h1>K-12 Mathematics Assessment Dashboard</h1>
+        <p>Performance Levels & Scale Scores vs. System Average</p>
+    </div>
 
-        <div id="loading" class="loading">
-            Loading dashboard data...
+    <div class="filters">
+        <div class="filter-group">
+            <label for="schoolSelect">Select School:</label>
+            <select id="schoolSelect">
+                <option value="">Choose a school...</option>
+            </select>
         </div>
-
-        <div id="error" class="error" style="display: none;">
-            Error loading data. Please check your data file.
+        <div class="filter-group">
+            <label for="benchmarkSelect">Benchmark Period:</label>
+            <select id="benchmarkSelect">
+                <option value="1">Benchmark I</option>
+                <option value="2">Benchmark II</option>
+            </select>
         </div>
+        <div class="filter-group">
+            <label for="gradeSelect">Grade/Course Level:</label>
+            <select id="gradeSelect">
+                <option value="">All Levels</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="assessmentSelect">Specific Assessment:</label>
+            <select id="assessmentSelect">
+                <option value="">All Assessments</option>
+            </select>
+            <button onclick="resetFilters()">Reset All Filters</button>
+        </div>
+    </div>
 
-        <div id="dashboard-content" style="display: none;">
-            <div class="stats-grid" id="stats-grid">
-                <!-- Stats will be loaded here -->
+    <div id="summarySection" class="summary-container" style="display: none;">
+        <div class="school-info">
+            <div class="school-name" id="selectedSchoolName"></div>
+            <div class="assessment-info" id="selectedAssessmentInfo"></div>
+        </div>
+        
+        <h3>Performance Level Distribution</h3>
+        <div class="performance-levels">
+            <div class="pl-box pl-1">
+                <div class="pl-value" id="schoolPL1">--</div>
+                <div class="pl-label">Emerging<br>Learner (PL1)</div>
             </div>
+            <div class="pl-box pl-2">
+                <div class="pl-value" id="schoolPL2">--</div>
+                <div class="pl-label">Developing<br>Learner (PL2)</div>
+            </div>
+            <div class="pl-box pl-3">
+                <div class="pl-value" id="schoolPL3">--</div>
+                <div class="pl-label">On-Track<br>Learner (PL3)</div>
+            </div>
+            <div class="pl-box pl-4">
+                <div class="pl-value" id="schoolPL4">--</div>
+                <div class="pl-label">Advanced<br>Learner (PL4)</div>
+            </div>
+        </div>
 
-            <div class="schools-section">
-                <h2 class="section-title">School Performance Overview</h2>
-                <div class="schools-grid" id="schools-grid">
-                    <!-- Schools will be loaded here -->
-                </div>
+        <div class="summary-stats">
+            <div class="stat-box">
+                <div class="stat-value" id="schoolScale">--</div>
+                <div class="stat-label">School Average<br>Scale Score</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="systemScale">--</div>
+                <div class="stat-label">System Average<br>Scale Score</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="scaleDifference">--</div>
+                <div class="stat-label">Difference from<br>System Average</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="proficientPercent">--</div>
+                <div class="stat-label">Proficient+<br>(PL3 + PL4)</div>
             </div>
         </div>
     </div>
 
+    <div class="dashboard">
+        <div class="chart-container">
+            <div class="chart-title">Performance Level Comparison</div>
+            <canvas id="performanceLevelChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <div class="chart-title">Scale Score Comparison</div>
+            <canvas id="scaleScoreChart"></canvas>
+        </div>
+    </div>
+
     <script>
-        // Load data from external JSON file
-        async function loadDashboardData() {
-            try {
-                const response = await fetch('data.json');
-                if (!response.ok) {
-                    throw new Error('Failed to load data');
-                }
-                const data = await response.json();
-                renderDashboard(data);
-            } catch (error) {
-                console.error('Error loading data:', error);
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('error').style.display = 'block';
-            }
-        }
-
-        function renderDashboard(data) {
-            // Hide loading, show content
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('dashboard-content').style.display = 'block';
-
-            // Render statistics
-            renderStats(data.statistics);
+        // Sample data based on your Excel structure - replace with your actual data
+        const assessmentData = [
+            // Beachside Academy data
+            { school: "Beachside Academy", level: "K-8", assessment: "SY25 Math 1 Benchmark I", benchmark: 1, scaleScore: 289, pl1: 32, pl2: 46, pl3: 21, pl4: 1 },
+            { school: "Beachside Academy", level: "K-8", assessment: "SY25 Math 2 Benchmark I", benchmark: 1, scaleScore: 265, pl1: 50, pl2: 50, pl3: 0, pl4: 0 },
+            { school: "Beachside Academy", level: "K-8", assessment: "SY25 Math 3 Benchmark I", benchmark: 1, scaleScore: 272, pl1: 52, pl2: 36, pl3: 12, pl4: 0 },
+            { school: "Beachside Academy", level: "K-8", assessment: "SY25 Math 1 Benchmark II", benchmark: 2, scaleScore: 278, pl1: 41, pl2: 52, pl3: 7, pl4: 0 },
+            { school: "Beachside Academy", level: "K-8", assessment: "SY25 Math 2 Benchmark II", benchmark: 2, scaleScore: 255, pl1: 74, pl2: 24, pl3: 2, pl4: 0 },
+            { school: "Beachside Academy", level: "K-8", assessment: "SY25 Math 3 Benchmark II", benchmark: 2, scaleScore: 282, pl1: 41, pl2: 34, pl3: 23, pl4: 2 },
             
-            // Render schools
-            renderSchools(data.schools);
+            // Mountain View High School data
+            { school: "Mountain View High School", level: "K-5", assessment: "SY25 Algebra 1 Benchmark I", benchmark: 1, scaleScore: 271, pl1: 35, pl2: 62, pl3: 3, pl4: 0 },
+            { school: "Mountain View High School", level: "K-5", assessment: "SY25 Algebra 2 Benchmark I", benchmark: 1, scaleScore: 265, pl1: 56, pl2: 38, pl3: 6, pl4: 0 },
+            { school: "Mountain View High School", level: "K-5", assessment: "SY25 Geometry Benchmark I", benchmark: 1, scaleScore: 254, pl1: 70, pl2: 29, pl3: 1, pl4: 0 },
+            { school: "Mountain View High School", level: "K-5", assessment: "SY25 Algebra 1 Benchmark II", benchmark: 2, scaleScore: 265, pl1: 56, pl2: 40, pl3: 4, pl4: 0 },
+            { school: "Mountain View High School", level: "K-5", assessment: "SY25 Algebra 2 Benchmark II", benchmark: 2, scaleScore: 263, pl1: 63, pl2: 32, pl3: 5, pl4: 0 },
+            { school: "Mountain View High School", level: "K-5", assessment: "SY25 Geometry Benchmark II", benchmark: 2, scaleScore: 258, pl1: 68, pl2: 29, pl3: 3, pl4: 0 },
+            
+            // Oceanside Elementary data
+            { school: "Oceanside Elementary Schools", level: "K-5", assessment: "SY25 Math 1 Benchmark I", benchmark: 1, scaleScore: 292, pl1: 21, pl2: 60, pl3: 19, pl4: 0 },
+            { school: "Oceanside Elementary Schools", level: "K-5", assessment: "SY25 Math 2 Benchmark I", benchmark: 1, scaleScore: 293, pl1: 19, pl2: 67, pl3: 14, pl4: 0 },
+            { school: "Oceanside Elementary Schools", level: "K-5", assessment: "SY25 Math 3 Benchmark I", benchmark: 1, scaleScore: 264, pl1: 66, pl2: 23, pl3: 11, pl4: 0 },
+            { school: "Oceanside Elementary Schools", level: "K-5", assessment: "SY25 Math 4 Benchmark I", benchmark: 1, scaleScore: 258, pl1: 70, pl2: 28, pl3: 2, pl4: 0 },
+        ];
+
+        let currentData = [];
+        let plChart, scaleChart;
+
+        function initializePage() {
+            populateFilters();
+            initializeCharts();
+            updateFilters();
         }
 
-        function renderStats(stats) {
-            const statsGrid = document.getElementById('stats-grid');
-            statsGrid.innerHTML = '';
-
-            Object.entries(stats).forEach(([key, value]) => {
-                const statCard = document.createElement('div');
-                statCard.className = 'stat-card';
-                
-                const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-                
-                statCard.innerHTML = `
-                    <div class="stat-number">${value.toLocaleString()}</div>
-                    <div class="stat-label">${label}</div>
-                `;
-                
-                statsGrid.appendChild(statCard);
-            });
-        }
-
-        function renderSchools(schools) {
-            const schoolsGrid = document.getElementById('schools-grid');
-            schoolsGrid.innerHTML = '';
-
+        function populateFilters() {
+            // Populate schools
+            const schools = [...new Set(assessmentData.map(item => item.school))];
+            const schoolSelect = document.getElementById('schoolSelect');
             schools.forEach(school => {
-                const schoolCard = document.createElement('div');
-                schoolCard.className = 'school-card';
-                
-                schoolCard.innerHTML = `
-                    <div class="school-name">${school.name}</div>
-                    <div class="school-info">
-                        <div class="info-item">
-                            <span>Students:</span>
-                            <span>${school.students.toLocaleString()}</span>
-                        </div>
-                        <div class="info-item">
-                            <span>Teachers:</span>
-                            <span>${school.teachers}</span>
-                        </div>
-                        <div class="info-item">
-                            <span>Grade Levels:</span>
-                            <span>${school.gradeLevels}</span>
-                        </div>
-                        <div class="info-item">
-                            <span>Performance:</span>
-                            <span>${school.performanceRating}</span>
-                        </div>
-                        ${school.specialPrograms ? `
-                        <div class="info-item" style="grid-column: 1/-1;">
-                            <span>Programs:</span>
-                            <span>${school.specialPrograms}</span>
-                        </div>
-                        ` : ''}
-                    </div>
-                `;
-                
-                schoolsGrid.appendChild(schoolCard);
+                const option = document.createElement('option');
+                option.value = school;
+                option.textContent = school;
+                schoolSelect.appendChild(option);
+            });
+
+            // Populate grade levels
+            const levels = [...new Set(assessmentData.map(item => item.level))];
+            const gradeSelect = document.getElementById('gradeSelect');
+            levels.forEach(level => {
+                const option = document.createElement('option');
+                option.value = level;
+                option.textContent = level;
+                gradeSelect.appendChild(option);
+            });
+
+            // Add event listeners
+            document.getElementById('schoolSelect').addEventListener('change', updateDisplay);
+            document.getElementById('benchmarkSelect').addEventListener('change', updateFilters);
+            document.getElementById('gradeSelect').addEventListener('change', updateFilters);
+            document.getElementById('assessmentSelect').addEventListener('change', updateDisplay);
+        }
+
+        function updateFilters() {
+            const selectedSchool = document.getElementById('schoolSelect').value;
+            const selectedBenchmark = document.getElementById('benchmarkSelect').value;
+            const selectedGrade = document.getElementById('gradeSelect').value;
+
+            // Filter assessments based on selections
+            let filteredData = assessmentData;
+            if (selectedSchool) filteredData = filteredData.filter(item => item.school === selectedSchool);
+            if (selectedBenchmark) filteredData = filteredData.filter(item => item.benchmark == selectedBenchmark);
+            if (selectedGrade) filteredData = filteredData.filter(item => item.level === selectedGrade);
+
+            // Update assessment dropdown
+            const assessments = [...new Set(filteredData.map(item => item.assessment))];
+            const assessmentSelect = document.getElementById('assessmentSelect');
+            assessmentSelect.innerHTML = '<option value="">All Assessments</option>';
+            assessments.forEach(assessment => {
+                const option = document.createElement('option');
+                option.value = assessment;
+                option.textContent = assessment.replace('SY25 ', '');
+                assessmentSelect.appendChild(option);
+            });
+
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            const selectedSchool = document.getElementById('schoolSelect').value;
+            const selectedBenchmark = document.getElementById('benchmarkSelect').value;
+            const selectedGrade = document.getElementById('gradeSelect').value;
+            const selectedAssessment = document.getElementById('assessmentSelect').value;
+
+            if (!selectedSchool) {
+                document.getElementById('summarySection').style.display = 'none';
+                return;
+            }
+
+            // Filter data
+            let filteredData = assessmentData.filter(item => 
+                item.school === selectedSchool && 
+                item.benchmark == selectedBenchmark
+            );
+            
+            if (selectedGrade) filteredData = filteredData.filter(item => item.level === selectedGrade);
+            if (selectedAssessment) filteredData = filteredData.filter(item => item.assessment === selectedAssessment);
+
+            if (filteredData.length === 0) return;
+
+            // Calculate averages
+            const avgData = calculateAverages(filteredData);
+            const systemAvg = calculateSystemAverages();
+
+            // Update display
+            updateSummaryDisplay(avgData, systemAvg, selectedSchool, selectedBenchmark, selectedAssessment || 'All Assessments');
+            updateCharts(avgData, systemAvg);
+
+            document.getElementById('summarySection').style.display = 'block';
+        }
+
+        function calculateAverages(data) {
+            const totalEntries = data.length;
+            return {
+                scaleScore: Math.round(data.reduce((sum, item) => sum + item.scaleScore, 0) / totalEntries),
+                pl1: Math.round(data.reduce((sum, item) => sum + item.pl1, 0) / totalEntries),
+                pl2: Math.round(data.reduce((sum, item) => sum + item.pl2, 0) / totalEntries),
+                pl3: Math.round(data.reduce((sum, item) => sum + item.pl3, 0) / totalEntries),
+                pl4: Math.round(data.reduce((sum, item) => sum + item.pl4, 0) / totalEntries)
+            };
+        }
+
+        function calculateSystemAverages() {
+            // Calculate system-wide averages across all data
+            const totalEntries = assessmentData.length;
+            return {
+                scaleScore: Math.round(assessmentData.reduce((sum, item) => sum + item.scaleScore, 0) / totalEntries),
+                pl1: Math.round(assessmentData.reduce((sum, item) => sum + item.pl1, 0) / totalEntries),
+                pl2: Math.round(assessmentData.reduce((sum, item) => sum + item.pl2, 0) / totalEntries),
+                pl3: Math.round(assessmentData.reduce((sum, item) => sum + item.pl3, 0) / totalEntries),
+                pl4: Math.round(assessmentData.reduce((sum, item) => sum + item.pl4, 0) / totalEntries)
+            };
+        }
+
+        function updateSummaryDisplay(schoolData, systemData, schoolName, benchmark, assessment) {
+            document.getElementById('selectedSchoolName').textContent = schoolName;
+            document.getElementById('selectedAssessmentInfo').textContent = `Benchmark ${benchmark} - ${assessment}`;
+            
+            document.getElementById('schoolPL1').textContent = schoolData.pl1 + '%';
+            document.getElementById('schoolPL2').textContent = schoolData.pl2 + '%';
+            document.getElementById('schoolPL3').textContent = schoolData.pl3 + '%';
+            document.getElementById('schoolPL4').textContent = schoolData.pl4 + '%';
+            
+            document.getElementById('schoolScale').textContent = schoolData.scaleScore;
+            document.getElementById('systemScale').textContent = systemData.scaleScore;
+            
+            const difference = schoolData.scaleScore - systemData.scaleScore;
+            document.getElementById('scaleDifference').textContent = (difference > 0 ? '+' : '') + difference;
+            document.getElementById('scaleDifference').style.color = difference >= 0 ? '#27ae60' : '#e74c3c';
+            
+            const proficient = schoolData.pl3 + schoolData.pl4;
+            document.getElementById('proficientPercent').textContent = proficient + '%';
+        }
+
+        function initializeCharts() {
+            // Performance Level Chart
+            const ctx1 = document.getElementById('performanceLevelChart').getContext('2d');
+            plChart = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: ['PL1 (Emerging)', 'PL2 (Developing)', 'PL3 (On-Track)', 'PL4 (Advanced)'],
+                    datasets: [{
+                        label: 'School',
+                        data: [0, 0, 0, 0],
+                        backgroundColor: ['#e74c3c', '#f39c12', '#27ae60', '#2980b9']
+                    }, {
+                        label: 'System Average',
+                        data: [0, 0, 0, 0],
+                        backgroundColor: ['#ecf0f1', '#ecf0f1', '#ecf0f1', '#ecf0f1'],
+                        borderColor: ['#95a5a6', '#95a5a6', '#95a5a6', '#95a5a6'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Scale Score Chart
+            const ctx2 = document.getElementById('scaleScoreChart').getContext('2d');
+            scaleChart = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['Scale Score'],
+                    datasets: [{
+                        label: 'School Average',
+                        data: [0],
+                        backgroundColor: '#3498db'
+                    }, {
+                        label: 'System Average',
+                        data: [0],
+                        backgroundColor: '#95a5a6'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 350
+                        }
+                    }
+                }
             });
         }
 
-        // Load data when page loads
-        document.addEventListener('DOMContentLoaded', loadDashboardData);
+        function updateCharts(schoolData, systemData) {
+            // Update Performance Level Chart
+            plChart.data.datasets[0].data = [schoolData.pl1, schoolData.pl2, schoolData.pl3, schoolData.pl4];
+            plChart.data.datasets[1].data = [systemData.pl1, systemData.pl2, systemData.pl3, systemData.pl4];
+            plChart.update();
+
+            // Update Scale Score Chart
+            scaleChart.data.datasets[0].data = [schoolData.scaleScore];
+            scaleChart.data.datasets[1].data = [systemData.scaleScore];
+            scaleChart.update();
+        }
+
+        function resetFilters() {
+            document.getElementById('schoolSelect').value = '';
+            document.getElementById('benchmarkSelect').value = '1';
+            document.getElementById('gradeSelect').value = '';
+            document.getElementById('assessmentSelect').value = '';
+            document.getElementById('summarySection').style.display = 'none';
+            updateFilters();
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initializePage);
     </script>
 </body>
 </html>
